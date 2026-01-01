@@ -1,0 +1,174 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Order;
+use App\Models\Drink;
+use App\Models\Customer;
+use Illuminate\Http\Request;
+
+class OrderController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        $orders = Order::with(['drinks', 'customer'])
+        ->where('user_id', auth()->id())
+        ->latest()
+        ->get();
+
+    return view('orders.index', compact('orders'));
+    //     $orders = Order::where('user_id', auth()->id())
+    //     ->with('drinks')
+    //     ->latest()
+    //     ->get();
+
+    // return view('orders.index', compact('orders'));
+    }
+
+    public function create()
+    {
+        $drinks = Drink::all();
+    return view('orders.create', compact('drinks'));
+    }
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+          $request->validate([
+        'drinks' => 'required|array',
+        'quantities' => 'required|array',
+        'table_number' => 'nullable|integer',
+        'customer_phone' => 'nullable|string',
+    ]);
+
+    // 🧠 logic ديال customer
+    $customerId = null;
+
+    if ($request->filled('customer_phone')) {
+        $customer = Customer::firstOrCreate(
+            ['phone' => $request->customer_phone],
+            [
+                'name' => null,
+                'user_id' => auth()->id(),
+            ]
+        );
+
+        $customerId = $customer->id;
+    }
+
+    // ✨ إنشاء order
+    $order = Order::create([
+        'user_id' => auth()->id(),
+        'customer_id' => $customerId,
+        'table_number' => $request->table_number,
+        'total' => 0,
+        'status' => 'pending',
+    ]);
+
+    $total = 0;
+
+    foreach ($request->drinks as $drinkId) {
+        $quantity = $request->quantities[$drinkId] ?? 0;
+        $drink = Drink::find($drinkId);
+
+        if ($drink && $quantity > 0) {
+            $order->drinks()->attach($drinkId, [
+                'quantity' => $quantity
+            ]);
+
+            $total += $drink->price * $quantity;
+        }
+    }
+
+    $order->update(['total' => $total]);
+
+    return redirect()
+    ->route('orders.show', $order)
+    ->with('success', 'Order created successfully');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(Order $order)
+    {
+         // security: غير صاحب الحساب
+    if ($order->user_id !== auth()->id()) {
+        abort(403);
+    }
+
+    $order->load('drinks');
+
+    return view('orders.show', compact('order'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, Order $order)
+    {
+        abort_if($order->user_id !== auth()->id(), 403);
+    abort_if($order->status !== 'pending', 403);
+
+    $request->validate([
+        'quantities' => 'required|array',
+    ]);
+
+    $total = 0;
+    $syncData = [];
+
+    foreach ($request->quantities as $drinkId => $qty) {
+        if ($qty > 0) {
+            $drink = Drink::find($drinkId);
+            if ($drink) {
+                $syncData[$drinkId] = ['quantity' => $qty];
+                $total += $drink->price * $qty;
+            }
+        }
+    }
+
+    $order->drinks()->sync($syncData);
+    $order->update(['total' => $total]);
+
+    return redirect()
+    ->route('orders.show', $order)
+    ->with('success', 'Order updated');
+    }
+
+public function updateStatus(Request $request, Order $order)
+{
+   $request->validate([
+        'status' => 'required|in:paid,cancelled',
+    ]);
+
+    $order->update([
+        'status' => $request->status,
+    ]);
+
+    return back()->with('success', 'Order status updated');
+}
+
+    public function edit(Order $order)
+{
+    abort_if($order->user_id !== auth()->id(), 403);
+    abort_if($order->status !== 'pending', 403);
+
+    $order->load('drinks');
+    $drinks = Drink::all();
+
+    return view('orders.edit', compact('order', 'drinks'));
+}
+
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Order $order)
+    {
+        //
+    }
+}

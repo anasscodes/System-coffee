@@ -97,6 +97,11 @@
                             </button>
                         </form>
 
+                        <a href="{{ route('orders.receipt', $order) }}"
+                            class="bg-cyan-600 text-white px-4 py-2 rounded hover:bg-cyan-700">
+                            🧾 Ticket
+                            </a>
+
                         <form method="POST"
                               action="{{ route('orders.updateStatus', $order) }}">
                             @csrf

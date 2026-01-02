@@ -14,18 +14,29 @@ class OrderController extends Controller
      */
     public function index()
     {
+        $user = auth()->user();
+
+    if ($user->isAdmin() || $user->isCashier()) {
+        // يشوف جميع الطلبات
         $orders = Order::with(['drinks', 'customer'])
-        ->where('user_id', auth()->id())
-        ->latest()
-        ->get();
+            ->latest()
+            ->get();
+    } else {
+        // server يشوف غير ديالو
+        $orders = Order::with(['drinks', 'customer'])
+            ->where('user_id', $user->id)
+            ->latest()
+            ->get();
+    }
 
     return view('orders.index', compact('orders'));
-    //     $orders = Order::where('user_id', auth()->id())
-    //     ->with('drinks')
+    //     $orders = Order::with(['drinks', 'customer'])
+    //     ->where('user_id', auth()->id())
     //     ->latest()
     //     ->get();
 
     // return view('orders.index', compact('orders'));
+   
     }
 
     public function create()
@@ -106,6 +117,16 @@ class OrderController extends Controller
     return view('orders.show', compact('order'));
     }
 
+    public function receipt(Order $order)
+{
+    abort_if($order->user_id !== auth()->id(), 403);
+
+    $order->load(['drinks', 'customer']);
+
+    return view('orders.receipt', compact('order'));
+}
+
+
     /**
      * Update the specified resource in storage.
      */
@@ -141,6 +162,10 @@ class OrderController extends Controller
 
 public function updateStatus(Request $request, Order $order)
 {
+
+    abort_if(!auth()->user()->canPay(), 403);
+    abort_if($order->status !== 'pending', 403);
+
    $request->validate([
         'status' => 'required|in:paid,cancelled',
     ]);

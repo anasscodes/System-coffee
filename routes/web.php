@@ -18,16 +18,18 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
 
+    $user = auth()->user();
     $today = Carbon::today();
 
-    $ordersToday = Order::whereDate('created_at', $today)
-        ->where('user_id', auth()->id())
-        ->get();
+    if ($user->isAdmin()) {
+        $ordersToday = Order::whereDate('created_at', $today)->get();
+    } else {
+        $ordersToday = Order::whereDate('created_at', $today)
+            ->where('user_id', $user->id)
+            ->get();
+    }
 
-    $todayRevenue = $ordersToday
-        ->where('status', 'paid')
-        ->sum('total');
-
+    $todayRevenue = $ordersToday->where('status', 'paid')->sum('total');
     $paidCount = $ordersToday->where('status', 'paid')->count();
     $pendingCount = $ordersToday->where('status', 'pending')->count();
 
@@ -37,6 +39,7 @@ Route::get('/dashboard', function () {
         'pendingCount'
     ));
 })->middleware(['auth'])->name('dashboard');
+
 
 Route::middleware('auth')->group(function () {
 
@@ -48,8 +51,7 @@ Route::middleware('auth')->group(function () {
     // ✅ ROUTES  ديالorders  
     Route::resource('orders', OrderController::class);
 
-    // Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])
-    // ->name('orders.status');
+
     Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])
     ->name('orders.updateStatus');
 
@@ -62,6 +64,9 @@ Route::middleware('auth')->group(function () {
 
     Route::put('/orders/{order}', [OrderController::class, 'update'])
     ->name('orders.update');
+
+    Route::get('/orders/{order}/receipt', [OrderController::class, 'receipt'])
+    ->name('orders.receipt');
 
 
 
@@ -76,8 +81,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
 
-    Route::resource('customers', CustomerController::class);
-    Route::resource('drinks', DrinkController::class);
+    // Route::resource('customers', CustomerController::class);
+    // Route::resource('drinks', DrinkController::class);
 
 
 });

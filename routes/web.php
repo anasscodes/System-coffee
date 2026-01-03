@@ -68,6 +68,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/orders/{order}/receipt', [OrderController::class, 'receipt'])
     ->name('orders.receipt');
 
+    Route::get('/reports', [OrderController::class, 'reports'])
+    ->name('reports.index');
+
+    Route::get('/orders/{order}/pdf', [OrderController::class, 'pdf'])
+    ->name('orders.pdf');
+
+
 
 
     // ✅ ROUTES  ديالDrink   

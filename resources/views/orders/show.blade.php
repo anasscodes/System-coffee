@@ -67,6 +67,7 @@
                     </tbody>
                 </table>
 
+                
                 {{-- Total --}}
                 <div class="mt-4 text-right text-lg font-semibold">
                     Total: {{ number_format($order->total, 2) }} DH

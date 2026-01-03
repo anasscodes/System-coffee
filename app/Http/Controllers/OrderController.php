@@ -6,6 +6,8 @@ use App\Models\Order;
 use App\Models\Drink;
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class OrderController extends Controller
 {
@@ -38,6 +40,45 @@ class OrderController extends Controller
     // return view('orders.index', compact('orders'));
    
     }
+
+
+
+    public function reports()
+{
+    $today = Carbon::today();
+    $month = Carbon::now()->month;
+
+    $orders = Order::where('status', 'paid');
+
+    $dailyRevenue = (clone $orders)
+        ->whereDate('created_at', $today)
+        ->sum('total');
+
+    $monthlyRevenue = (clone $orders)
+        ->whereMonth('created_at', $month)
+        ->sum('total');
+
+    $paidCount = Order::where('status', 'paid')->count();
+    $pendingCount = Order::where('status', 'pending')->count();
+
+    return view('reports.index', compact(
+        'dailyRevenue',
+        'monthlyRevenue',
+        'paidCount',
+        'pendingCount'
+    ));
+}
+
+public function pdf(Order $order)
+{
+    abort_if($order->user_id !== auth()->id(), 403);
+
+    $order->load('drinks');
+
+    $pdf = Pdf::loadView('orders.pdf', compact('order'));
+
+    return $pdf->download('order-'.$order->id.'.pdf');
+}
 
     public function create()
     {
@@ -117,6 +158,8 @@ class OrderController extends Controller
     return view('orders.show', compact('order'));
     }
 
+
+
     public function receipt(Order $order)
 {
     abort_if($order->user_id !== auth()->id(), 403);
@@ -125,6 +168,7 @@ class OrderController extends Controller
 
     return view('orders.receipt', compact('order'));
 }
+
 
 
     /**
@@ -162,17 +206,21 @@ class OrderController extends Controller
 
 public function updateStatus(Request $request, Order $order)
 {
-
     abort_if(!auth()->user()->canPay(), 403);
     abort_if($order->status !== 'pending', 403);
 
-   $request->validate([
+    $request->validate([
         'status' => 'required|in:paid,cancelled',
     ]);
 
     $order->update([
         'status' => $request->status,
     ]);
+
+    // ✅ إلى تخلص → مشي مباشرة للـ receipt
+    if ($request->status === 'paid') {
+        return redirect()->route('orders.receipt', $order);
+    }
 
     return back()->with('success', 'Order status updated');
 }

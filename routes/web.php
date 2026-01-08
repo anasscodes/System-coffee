@@ -1,5 +1,6 @@
 <?php
-
+use App\Http\Controllers\ReceiptController;
+use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DrinkController;
@@ -33,11 +34,22 @@ Route::get('/dashboard', function () {
     $paidCount = $ordersToday->where('status', 'paid')->count();
     $pendingCount = $ordersToday->where('status', 'pending')->count();
 
+// 📊 Revenue last 7 days
+$revenueByDay = Order::selectRaw('DATE(created_at) as day, SUM(total) as total')
+    ->where('status', 'paid')
+    ->where('user_id', $user->id)
+    ->whereDate('created_at', '>=', Carbon::now()->subDays(6))
+    ->groupBy('day')
+    ->orderBy('day')
+    ->get();
+
     return view('dashboard', compact(
-        'todayRevenue',
-        'paidCount',
-        'pendingCount'
-    ));
+    'todayRevenue',
+    'paidCount',
+    'pendingCount',
+    'revenueByDay'
+));
+
 })->middleware(['auth'])->name('dashboard');
 
 
@@ -47,6 +59,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
     Route::get('/customers/create', [CustomerController::class, 'create'])->name('customers.create');
     Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
+
+    
 
     // ✅ ROUTES  ديالorders  
     Route::resource('orders', OrderController::class);
@@ -74,6 +88,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/orders/{order}/pdf', [OrderController::class, 'pdf'])
     ->name('orders.pdf');
 
+    Route::get('/receipt/{token}', [OrderController::class, 'receiptByToken'])
+    ->name('orders.receipt.token');
+
 
 
 
@@ -88,11 +105,20 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
 
-    // Route::resource('customers', CustomerController::class);
-    // Route::resource('drinks', DrinkController::class);
+   
 
 
 });
+
+
+
+Route::get('/receipt/{token}', [ReceiptController::class, 'show'])
+    ->name('receipt.show');
+
+Route::post('/receipt/{token}/feedback', [ReceiptController::class, 'storeFeedback'])
+    ->name('receipt.feedback');
+
+
 
 require __DIR__.'/auth.php';
 

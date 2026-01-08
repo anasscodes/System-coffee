@@ -4,82 +4,90 @@
     <meta charset="UTF-8">
     <title>Receipt - Order #{{ $order->id }}</title>
 
-    <style>
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            background: #f9fafb;
-            margin: 0;
-            padding: 20px;
-        }
+   <style>
+body {
+    font-family: 'Inter', Arial, sans-serif;
+    background: #f3f4f6;
+}
 
-        .receipt {
-            max-width: 360px;
-            margin: auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,.08);
-        }
+.receipt {
+    max-width: 360px;
+    margin: auto;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,.08);
+}
 
-        .center {
-            text-align: center;
-        }
+.title {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: .5px;
+}
 
-        .title {
-            font-size: 20px;
-            font-weight: bold;
-        }
+hr {
+    border: none;
+    border-top: 1px dashed #e5e7eb;
+    margin: 16px 0;
+}
 
-        .muted {
-            color: #6b7280;
-            font-size: 12px;
-        }
+.row {
+    font-size: 14px;
+    margin-bottom: 6px;
+}
 
-        hr {
-            border: none;
-            border-top: 1px dashed #d1d5db;
-            margin: 15px 0;
-        }
+.total {
+    font-size: 18px;
+    font-weight: 700;
+}
 
-        .row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 14px;
-            margin-bottom: 6px;
-        }
+.qr-box {
+    margin-top: 15px;
+    padding: 12px;
+    border: 1px dashed #d1d5db;
+    border-radius: 10px;
+    background: #fafafa;
+}
 
-        .bold {
-            font-weight: bold;
-        }
+.footer {
+    margin-top: 20px;
+    font-size: 12px;
+    color: #6b7280;
+}
 
-        .total {
-            font-size: 16px;
-            font-weight: bold;
-        }
+.receipt-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px;
+}
 
-        .footer {
-            margin-top: 20px;
-            text-align: center;
-            font-size: 12px;
-            color: #6b7280;
-        }
+.btn-secondary {
+    padding: 10px 16px;
+    background: #e5e7eb;
+    color: #111827;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+}
+.btn-primary {
+    padding: 10px 16px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
 
-        @media print {
-            body {
-                background: white;
-                padding: 0;
-            }
+/* ❌ ما يبانوش فـ الطباعة */
+@media print {
+    .receipt-actions {
+        display: none;
+    }
+}
+</style>
 
-            .receipt {
-                box-shadow: none;
-                border-radius: 0;
-            }
-
-            .no-print {
-                display: none;
-            }
-        }
-    </style>
 </head>
 
 <body>
@@ -137,12 +145,29 @@
 
     <hr>
 
-  <div class="center" style="margin-top:15px">
-        {!! QrCode::encoding('UTF-8')->size(120)->generate(
-            route('orders.show', $order)
-        ) !!}
-        <p style="font-size:12px">Scan to view order</p>
-    </div>
+{{-- <div class="center" style="margin-top:15px">
+  @if($order->receipt_token)
+    {!! QrCode::size(120)->generate(
+        route('receipt.show', $order->receipt_token)
+    ) !!}
+  <p style="font-size:12px">Scan to view receipt</p>
+@else
+    <p style="font-size:12px; color:#999">
+        Ticket will be available after payment
+    </p>
+
+    @endif
+</div> --}}
+
+<div class="center qr-box">
+    {!! QrCode::size(120)->generate(route('receipt.show', $order->receipt_token)) !!}
+    <p style="font-size:12px; margin-top:8px">
+        📱 Scan to view receipt & rate us
+    </p>
+</div>
+
+
+
 
     {{-- Footer --}}
     <div class="footer">
@@ -153,7 +178,7 @@
 </div>
 
 {{-- Actions --}}
-<div class="center no-print" style="margin-top: 20px;">
+{{-- <div class="center no-print" style="margin-top: 20px;">
     <button onclick="window.print()"
             style="padding:10px 16px; background:#16a34a; color:white; border:none; border-radius:6px; cursor:pointer;">
         🖨 Print Receipt
@@ -165,7 +190,14 @@
        style="font-size:14px; color:#2563eb; text-decoration:none;">
         ⬅ Back to Order
     </a>
+</div> --}}
+
+<div class="receipt-actions">
+    <a href="{{ route('orders.index') }}" class="btn-secondary">⬅ Back to orders</a>
+     <br><br>
+    <button onclick="window.print()" class="btn-primary">🖨 Print</button>
 </div>
+
 
 
 

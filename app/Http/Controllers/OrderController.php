@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\Drink;
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -113,13 +114,14 @@ public function pdf(Order $order)
     }
 
     // ✨ إنشاء order
-    $order = Order::create([
-        'user_id' => auth()->id(),
-        'customer_id' => $customerId,
-        'table_number' => $request->table_number,
-        'total' => 0,
-        'status' => 'pending',
-    ]);
+   $order = Order::create([
+    'user_id' => auth()->id(),
+    'customer_id' => $customerId, // مهم
+    'table_number' => $request->table_number,
+    'total' => 0,
+    'status' => 'pending',
+    'receipt_token' => Str::uuid(),
+]);
 
     $total = 0;
 
@@ -206,6 +208,10 @@ public function pdf(Order $order)
 
 public function updateStatus(Request $request, Order $order)
 {
+    session()->flash('notify', '💰 New order paid (#' . $order->id . ')');
+    return redirect()->route('dashboard');
+
+    
     abort_if(!auth()->user()->canPay(), 403);
     abort_if($order->status !== 'pending', 403);
 
@@ -213,17 +219,29 @@ public function updateStatus(Request $request, Order $order)
         'status' => 'required|in:paid,cancelled',
     ]);
 
-    $order->update([
-        'status' => $request->status,
-    ]);
-
-    // ✅ إلى تخلص → مشي مباشرة للـ receipt
+    // ✅ إلا تخلص → نولّد token
     if ($request->status === 'paid') {
-        return redirect()->route('orders.receipt', $order);
+        $order->update([
+            'status' => 'paid',
+            'receipt_token' => \Str::uuid(),
+        ]);
+
+        // 🔄 نعاود نجيب order محدث
+        $order->refresh();
+
+       return redirect()->route('orders.receipt', $order);
+
     }
+
+    // cancelled
+    $order->update([
+        'status' => 'cancelled',
+    ]);
 
     return back()->with('success', 'Order status updated');
 }
+
+
 
     public function edit(Order $order)
 {
@@ -235,6 +253,25 @@ public function updateStatus(Request $request, Order $order)
 
     return view('orders.edit', compact('order', 'drinks'));
 }
+
+
+public function receiptByToken(string $token)
+{
+    $order = Order::where('receipt_token', $token)
+        ->where('status', 'paid')
+        ->firstOrFail();
+
+    $order->load(['drinks', 'customer']);
+
+    return view('orders.receipt', compact('order'));
+}
+// public function receiptByToken($token)
+// {
+//     $order = Order::where('receipt_token', $token)->firstOrFail();
+
+//     return view('orders.receipt', compact('order'));
+// }
+
 
 
     /**

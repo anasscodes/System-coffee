@@ -14,8 +14,11 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100">
+  <body class="font-sans antialiased bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100 transition-colors duration-300">
+    <div class="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors">
+
+
+
             {{-- @include('layouts.navigation') --}}
             @auth
                 @include('layouts.navigation')
@@ -24,11 +27,14 @@
 
             <!-- Page Heading -->
             @isset($header)
-                <header class="bg-white shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
+             <header class="bg-white dark:bg-gray-800 shadow">
+    <div class="max-w-7xl mx-auto py-6 px-4">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">
+            {{ $header }}
+        </h2>
+    </div>
+</header>
+
             @endisset
 
             <!-- Page Content -->
@@ -36,5 +42,24 @@
                 {{ $slot }}
             </main>
         </div>
+
+
+        @if(session('notify'))
+<div id="toast"
+    class="fixed top-5 right-5 z-50 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg">
+    {{ session('notify') }}
+</div>
+
+<script>
+setTimeout(() => {
+    document.getElementById('toast')?.remove();
+}, 4000);
+</script>
+@endif
+
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
     </body>
 </html>

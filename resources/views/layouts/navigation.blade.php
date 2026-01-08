@@ -1,4 +1,4 @@
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
+<nav x-data="{ open: false }" class="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700 transition-colors">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -36,7 +36,9 @@
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 text-sm rounded-md text-gray-600 hover:text-gray-800">
+                        <button class="inline-flex items-center px-3 py-2 text-sm rounded-md
+                                    text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white">
+
                             {{ auth()->user()->name }}
                             <svg class="ms-1 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M5.293 7.293L10 11.586l4.707-4.293 1.414 1.414L10 14.414 3.879 8.707z"/>
@@ -56,8 +58,15 @@
                                 Log Out
                             </x-dropdown-link>
                         </form>
+                                
                     </x-slot>
+                    
                 </x-dropdown>
+                    <button id="darkToggle"
+                        class="ml-4 p-2 rounded-lg bg-gray-200 dark:bg-gray-700">
+                        🌙
+                    </button>
+
             </div>
 
             <!-- Hamburger -->

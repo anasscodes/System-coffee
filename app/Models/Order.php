@@ -2,11 +2,20 @@
 
 namespace App\Models;
 
+
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Feedback;
 
 class Order extends Model
 {
-protected $fillable = ['user_id','customer_id','table_number', 'total', 'status'];
+protected $fillable = ['user_id',
+    'customer_id',
+    'table_number',
+    'total',
+    'status',
+    'receipt_token' // ✅ ضروري];
+];
+
 
     // Order belongs to User
     public function user()
@@ -26,6 +35,12 @@ protected $fillable = ['user_id','customer_id','table_number', 'total', 'status'
                     ->withPivot('quantity')
                     ->withTimestamps();
     }
+
+    public function feedback()
+{
+    return $this->hasOne(Feedback::class);
+}
+
 
 
 }

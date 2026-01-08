@@ -116,6 +116,11 @@
 
                     @endif
 
+                    <a href="{{ route('orders.pdf', $order) }}"
+                        class="inline-block px-4 py-2 bg-zinc-600 text-white rounded hover:bg-red-700">
+                            📄 Download PDF
+                        </a>
+
                 </div>
 
             </div>

@@ -1,79 +1,84 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200">
             Create Order
         </h2>
     </x-slot>
 
-    <div class="py-6">
-        
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            <div class="mt-6">
-    <a href="{{ route('orders.index') }}"
-       <a class="text-sm text-gray-500 dark:text-gray-400 hover:underline">
-        ← Back to Orders
-    </a>
-</div>
+    <div class="py-6 max-w-5xl mx-auto px-6">
 
-            <div class="bg-white dark:bg-gray-800 shadow rounded p-6">
+        <a href="{{ route('orders.index') }}"
+           class="text-sm text-gray-500 dark:text-gray-400 hover:underline mb-4 inline-block">
+            ← Back to Orders
+        </a>
 
-                
-                <form method="POST" action="{{ route('orders.store') }}">
-                    @csrf
+        <!-- FORM -->
+        <form method="POST" action="{{ route('orders.store') }}">
+            @csrf
 
-                    <h5 class="font-semibold mb-3">Order Type</h5>
+            <div class="bg-white dark:bg-gray-800 shadow rounded-xl p-6">
 
-                    <div class="mb-3">
-                        <label class="block mb-1 text-gray-700 dark:text-gray-300">Table Number (optional)</label>
-                        <input type="number" name="table_number"
-                                class="border-gray-300 dark:border-gray-600
-                                        bg-white dark:bg-gray-800
-                                        text-gray-800 dark:text-gray-100
-                                        rounded-md">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-6">
+                    Select Drinks
+                </h3>
+
+                @foreach($categories as $category => $drinks)
+
+                    <!-- CATEGORY TITLE -->
+                    <h4 class="text-lg font-semibold mt-6 mb-3
+                               text-gray-700 dark:text-gray-300 capitalize">
+                        @if($category === 'coffee') ☕ Coffee
+                        @elseif($category === 'milk') 🥛 Milk
+                        @elseif($category === 'juice') 🍊 Juice
+                        @elseif($category === 'soda') 🥤 Soda
+                        @else 🧊 Cold
+                        @endif
+                    </h4>
+
+                    <!-- DRINKS GRID -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        @foreach($drinks as $drink)
+                            <label
+                                class="cursor-pointer border rounded-xl p-4 text-center
+                                       bg-gray-50 dark:bg-gray-900
+                                       hover:ring-2 hover:ring-amber-500
+                                       transition">
+
+                                <input type="checkbox"
+                                       name="drinks[]"
+                                       value="{{ $drink->id }}"
+                                       class="hidden peer">
+
+                                <div class="text-3xl mb-2">
+                                    🥤
+                                </div>
+
+                                <div class="font-semibold text-gray-800 dark:text-gray-100">
+                                    {{ $drink->name }}
+                                </div>
+
+                                <div class="text-sm text-gray-500">
+                                    {{ $drink->price }} DH
+                                </div>
+
+                            </label>
+                        @endforeach
                     </div>
 
-                    <div class="mb-4">
-                        <label class="block mb-1 text-gray-700 dark:text-gray-300">Customer Phone (optional)</label>
-                        <input type="text" name="customer_phone"
-                                class="border-gray-300 dark:border-gray-600
-                                        bg-white dark:bg-gray-800
-                                        text-gray-800 dark:text-gray-100
-                                        rounded-md">
-                    </div>
+                @endforeach
 
-                    <hr class="my-4">
-
-                    <h5 class="font-semibold mb-3">Drinks</h5>
-
-                    @foreach($drinks as $drink)
-                        <div class="flex items-center mb-2">
-                            <input type="checkbox"
-                                   name="drinks[]"
-                                   value="{{ $drink->id }}"
-                                   class="mr-2 accent-green-600 dark:accent-green-500">
-
-                            <span class="w-40">
-                                {{ $drink->name }} ({{ $drink->price }} DH)
-                            </span>
-
-                            <input type="number"
-                                   name="quantities[{{ $drink->id }}]"
-                                   value="1"
-                                   min="1"
-                                    class="ml-3 w-20 border border-gray-300 dark:border-gray-600
-                                            bg-white dark:bg-gray-800
-                                            text-gray-800 dark:text-gray-100
-                                            rounded px-2 py-1">
-                        </div>
-                    @endforeach
-
+                <!-- ACTION -->
+                <div class="mt-8 flex justify-end">
                     <button type="submit"
-                        class="mt-6 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 dark:hover:bg-green-500 transition">
-                        Create Order
+                            class="bg-amber-500 hover:bg-amber-600
+                                   text-black font-semibold
+                                   px-8 py-3 rounded-xl transition">
+                        ✔ Create Order
                     </button>
-                </form>
+                </div>
 
             </div>
-        </div>
+        </form>
+
     </div>
 </x-app-layout>

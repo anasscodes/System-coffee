@@ -12,9 +12,10 @@ class DrinkController extends Controller
      */
     public function index()
     {
-        $drinks = Drink::orderBy('created_at', 'desc')->get();
+       $drinks = Drink::orderBy('category')->orderBy('name')->get()
+        ->groupBy('category');
 
-        return view('drinks.index', compact('drinks'));
+    return view('drinks.index', compact('drinks'));
     }
 
     /**
@@ -32,15 +33,17 @@ class DrinkController extends Controller
     {
             
         $request->validate([
-            'name'  => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-        ]);
+    'name' => 'required',
+    'price' => 'required|numeric',
+    'category' => 'required',
+]);
 
-        Drink::create([
-            'name'         => $request->name,
-            'price'        => $request->price,
-            'is_available' => true,
-        ]);
+Drink::create([
+    'name' => $request->name,
+    'price' => $request->price,
+    'category' => $request->category,
+    'is_available' => true,
+]);
 
         return redirect()->route('drinks.index')
             ->with('success', 'Drink added successfully');

@@ -83,66 +83,47 @@ public function pdf(Order $order)
 
     public function create()
     {
-        $drinks = Drink::all();
-    return view('orders.create', compact('drinks'));
+      $categories = Drink::all()->groupBy('category');
+
+return view('orders.create', compact('categories'));
+
     }
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
-          $request->validate([
-        'drinks' => 'required|array',
-        'quantities' => 'required|array',
-        'table_number' => 'nullable|integer',
-        'customer_phone' => 'nullable|string',
+         $request->validate([
+        'drinks' => 'required|array|min:1',
     ]);
 
-    // 🧠 logic ديال customer
-    $customerId = null;
-
-    if ($request->filled('customer_phone')) {
-        $customer = Customer::firstOrCreate(
-            ['phone' => $request->customer_phone],
-            [
-                'name' => null,
-                'user_id' => auth()->id(),
-            ]
-        );
-
-        $customerId = $customer->id;
-    }
-
-    // ✨ إنشاء order
-   $order = Order::create([
-    'user_id' => auth()->id(),
-    'customer_id' => $customerId, // مهم
-    'table_number' => $request->table_number,
-    'total' => 0,
-    'status' => 'pending',
-    'receipt_token' => Str::uuid(),
-]);
+    // create order
+    $order = Order::create([
+        'user_id' => auth()->id(),
+        'total' => 0,
+        'status' => 'pending',
+        'receipt_token' => Str::uuid(),
+    ]);
 
     $total = 0;
 
     foreach ($request->drinks as $drinkId) {
-        $quantity = $request->quantities[$drinkId] ?? 0;
         $drink = Drink::find($drinkId);
 
-        if ($drink && $quantity > 0) {
+        if ($drink) {
             $order->drinks()->attach($drinkId, [
-                'quantity' => $quantity
+                'quantity' => 1 // default
             ]);
 
-            $total += $drink->price * $quantity;
+            $total += $drink->price;
         }
     }
 
     $order->update(['total' => $total]);
 
     return redirect()
-    ->route('orders.show', $order)
-    ->with('success', 'Order created successfully');
+        ->route('orders.show', $order)
+        ->with('success', 'Order created successfully');
     }
 
     /**
@@ -208,37 +189,27 @@ public function pdf(Order $order)
 
 public function updateStatus(Request $request, Order $order)
 {
-    session()->flash('notify', '💰 New order paid (#' . $order->id . ')');
-    return redirect()->route('dashboard');
-
-    
-    abort_if(!auth()->user()->canPay(), 403);
+     abort_if(!auth()->user()->canPay(), 403);
     abort_if($order->status !== 'pending', 403);
 
     $request->validate([
         'status' => 'required|in:paid,cancelled',
     ]);
 
-    // ✅ إلا تخلص → نولّد token
     if ($request->status === 'paid') {
         $order->update([
             'status' => 'paid',
-            'receipt_token' => \Str::uuid(),
+            'receipt_token' => Str::uuid(),
         ]);
 
-        // 🔄 نعاود نجيب order محدث
-        $order->refresh();
+        session()->flash('notify', '💰 New order paid (#' . $order->id . ')');
 
-       return redirect()->route('orders.receipt', $order);
-
+        return redirect()->route('orders.receipt', $order);
     }
 
-    // cancelled
-    $order->update([
-        'status' => 'cancelled',
-    ]);
+    $order->update(['status' => 'cancelled']);
 
-    return back()->with('success', 'Order status updated');
+    return back()->with('success', 'Order cancelled');
 }
 
 

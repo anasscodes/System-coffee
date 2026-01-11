@@ -6,7 +6,8 @@
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+                      <x-application-logo class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-100" />
+
                     </a>
                 </div>
 
@@ -46,20 +47,29 @@
                         </button>
                     </x-slot>
 
-                    <x-slot name="content">
-                        <x-dropdown-link :href="route('profile.edit')">
-                            Profile
-                        </x-dropdown-link>
+                <x-slot name="content">
+    <x-dropdown-link
+        :href="route('profile.edit')"
+        class="text-gray-700 dark:text-gray-200
+               hover:bg-gray-100 dark:hover:bg-gray-700
+               transition">
+        Profile
+    </x-dropdown-link>
 
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <x-dropdown-link :href="route('logout')"
-                                onclick="event.preventDefault(); this.closest('form').submit();">
-                                Log Out
-                            </x-dropdown-link>
-                        </form>
-                                
-                    </x-slot>
+    <form method="POST" action="{{ route('logout') }}">
+        @csrf
+
+        <x-dropdown-link
+            :href="route('logout')"
+            onclick="event.preventDefault(); this.closest('form').submit();"
+            class="text-red-600 dark:text-red-400
+                   hover:bg-red-50 dark:hover:bg-gray-700
+                   transition">
+            Log Out
+        </x-dropdown-link>
+    </form>
+</x-slot>
+
                     
                 </x-dropdown>
                     <button id="darkToggle"
@@ -100,7 +110,7 @@
 
         </div>
 
-        <div class="pt-4 pb-1 border-t">
+       <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-700">
             <div class="px-4 text-sm">
                 {{ auth()->user()->email }}
             </div>

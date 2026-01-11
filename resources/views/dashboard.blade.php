@@ -2,11 +2,11 @@
 
   <x-slot name="header">
     <div class="flex items-center justify-between">
-        <h2 class="font-semibold text-2xl text-gray-800 tracking-tight">
-            ☕ Coffee Shop
+       <h2 class="font-semibold text-2xl text-gray-800 dark:text-gray-100 tracking-tight">
+            ☕ Coffee <span class="text-amber-400">POS</span><br>
         </h2>
 
-        <span class="text-sm text-gray-500">
+      <span class="text-sm text-gray-500 dark:text-gray-400">
             {{ now()->format('d M Y') }}
         </span>
     </div>
@@ -26,36 +26,9 @@
            
 
 
-            {{-- STATS --}}
-           <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+            
 
-    {{-- Revenue --}}
-<div class="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-xl p-6 shadow-md">
-        <p class="text-sm text-gray-500 dark:text-gray-400">Today Revenue</p>
-        <p class="mt-2 text-3xl font-bold text-green-600">
-            {{ number_format($todayRevenue, 2) }} DH
-        </p>
-    </div>
-
-    {{-- Paid --}}
-<div class="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-xl p-6 shadow-md">
-        <p class="text-sm text-gray-500 dark:text-gray-400">Paid Orders</p>
-        <p class="mt-2 text-3xl font-bold text-blue-600">
-            {{ $paidCount }}
-        </p>
-    </div>
-
-    {{-- Pending --}}
-<div class="bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-xl p-6 shadow-md">
-        <p class="text-sm text-gray-500 dark:text-gray-400">Pending Orders</p>
-        <p class="mt-2 text-3xl font-bold text-yellow-500">
-            {{ $pendingCount }}
-        </p>
-    </div>
-
-</div>
-
-<div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md mt-8">
+<div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md mt-8 transition-colors">
     <h3 class="font-semibold mb-4 text-gray-800 dark:text-gray-100">
         Revenue (Last 7 days)
     </h3>
@@ -66,8 +39,8 @@
 
 
             {{-- TODAY ORDERS --}}
-            <div class="bg-white shadow rounded-lg overflow-hidden">
-                <div class="p-4 font-semibold">
+        <div class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+               <div class="p-4 font-semibold text-gray-800 dark:text-gray-100">
                     Today Orders
                 </div>
 
@@ -87,16 +60,18 @@
 @foreach(\App\Models\Order::whereDate('created_at', today())->where('user_id', auth()->id())->latest()->get() as $order)
     <tr class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
         <td class="p-2 font-medium text-gray-800 dark:text-gray-100">{{ $order->id }}</td>
-        <td class="p-2">{{ $order->total }} DH</td>
+       <td class="p-2 text-gray-700 dark:text-gray-300"> {{ $order->total }} DH </td>
         <td class="p-2">
             <span class="px-2 py-1 rounded text-xs
-                {{ $order->status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }}">
+                {{ $order->status === 'paid'
+                    ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                    : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300' }}">
                 {{ ucfirst($order->status) }}
             </span>
         </td>
         <td class="p-2">
             <a href="{{ route('orders.show', $order) }}"
-               class="text-blue-600 hover:underline">
+               class="text-blue-600 dark:text-blue-400 hover:underline">
                 View
             </a>
         </td>

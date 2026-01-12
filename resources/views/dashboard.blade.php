@@ -45,39 +45,61 @@
                 </div>
 
                 <table class="w-full text-sm">
-  <thead class="bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-300 uppercase text-xs">
-
-
-        <tr>
-            <th class="p-3 text-left">Order</th>
-            <th class="p-3 text-center">Total</th>
-            <th class="p-3 text-center">Status</th>
-            <th class="p-3 text-center">Action</th>
-        </tr>
-    </thead>
-
-    <tbody>
-@foreach(\App\Models\Order::whereDate('created_at', today())->where('user_id', auth()->id())->latest()->get() as $order)
-    <tr class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-        <td class="p-2 font-medium text-gray-800 dark:text-gray-100">{{ $order->id }}</td>
-       <td class="p-2 text-gray-700 dark:text-gray-300"> {{ $order->total }} DH </td>
-        <td class="p-2">
-            <span class="px-2 py-1 rounded text-xs
-                {{ $order->status === 'paid'
-                    ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
-                    : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300' }}">
-                {{ ucfirst($order->status) }}
-            </span>
-        </td>
-        <td class="p-2">
-            <a href="{{ route('orders.show', $order) }}"
-               class="text-blue-600 dark:text-blue-400 hover:underline">
-                View
-            </a>
-        </td>
+  <thead class="bg-gray-50 dark:bg-gray-900
+              text-gray-600 dark:text-gray-300
+              uppercase text-xs">
+    <tr>
+        <th class="px-4 py-3 text-left w-1/4">Order</th>
+        <th class="px-4 py-3 text-center w-1/4">Total</th>
+        <th class="px-4 py-3 text-center w-1/4">Status</th>
+        <th class="px-4 py-3 text-center w-1/4">Action</th>
     </tr>
+</thead>
+
+   <tbody>
+@foreach(\App\Models\Order::whereDate('created_at', today())
+        ->where('user_id', auth()->id())
+        ->latest()
+        ->get() as $order)
+
+<tr class="border-t border-gray-200 dark:border-gray-700
+           hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+
+    {{-- Order --}}
+    <td class="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">
+        #{{ $order->id }}
+    </td>
+
+    {{-- Total --}}
+    <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300 font-semibold">
+        {{ number_format($order->total, 2) }} DH
+    </td>
+
+    {{-- Status --}}
+    <td class="px-4 py-3 text-center">
+        <span class="inline-flex items-center justify-center
+                     px-3 py-1 rounded-full text-xs font-semibold
+            {{ $order->status === 'paid'
+                ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300' }}">
+            {{ ucfirst($order->status) }}
+        </span>
+    </td>
+
+    {{-- Action --}}
+    <td class="px-4 py-3 text-center">
+        <a href="{{ route('orders.show', $order) }}"
+           class="inline-flex items-center gap-1
+                  text-blue-600 dark:text-blue-400
+                  hover:underline font-medium">
+            👁 View
+        </a>
+    </td>
+
+</tr>
 @endforeach
 </tbody>
+
 
 </table>
 

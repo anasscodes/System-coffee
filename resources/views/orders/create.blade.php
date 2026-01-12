@@ -40,14 +40,16 @@
                         @foreach($drinks as $drink)
                             <label
                                 class="cursor-pointer border rounded-xl p-4 text-center
-                                       bg-gray-50 dark:bg-gray-900
-                                       hover:ring-2 hover:ring-amber-500
-                                       transition">
+                                bg-gray-50 dark:bg-gray-900
+                                hover:ring-2 hover:ring-amber-500
+                                transition">
 
                                 <input type="checkbox"
-                                       name="drinks[]"
-                                       value="{{ $drink->id }}"
-                                       class="hidden peer">
+                                    name="drinks[]"
+                                    value="{{ $drink->id }}"
+                                    class="hidden peer">
+                                
+
 
                                 <div class="text-3xl mb-2">
                                     🥤

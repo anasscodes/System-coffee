@@ -17,3 +17,8 @@
     animation: fadeUp 0.6s ease forwards;
     opacity: 0;
 }
+/* 🔹 Fallback to avoid white flash */
+html, body {
+    background-color: #1a1a1a; /* Dark fallback */
+    color: #f0f0f0;           /* Text color fallback */
+}

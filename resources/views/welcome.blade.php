@@ -8,6 +8,7 @@
 
 <body class="min-h-screen bg-gradient-to-br from-black via-gray-900 to-gray-800
              flex items-center justify-center text-white">
+             
 
     <div class="max-w-4xl w-full px-8">
         <div class="grid md:grid-cols-2 gap-10 items-center">

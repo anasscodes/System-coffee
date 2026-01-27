@@ -7,6 +7,9 @@
 
     <title>{{ config('app.name', 'Coffee POS') }}</title>
 
+     <link rel="icon" type="image/png" href="/coffee.png">
+
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
